@@ -1,11 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import AddPatientDialog from '@/components/patients/AddPatientDialog'
-import PatientsTable from '@/components/patients/PatientsTable'
+import { PatientsTable } from '@/components/patients/PatientsTable'
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { useToast } from '@/components/ui/use-toast'
+import { supabase } from '@/lib/supabase'
+import { useRole } from '@/contexts/role-context'
+import { EditPatientDialog } from '@/components/patients/EditPatientDialog'
+import { AddPatientDialog } from '@/components/patients/AddPatientDialog'
+import { type Patient } from "@/app/patients/types"
+import { PageContainer } from '@/components/ui/page-container'
 
 export interface Patient {
   id: string
@@ -20,29 +26,189 @@ export interface Patient {
   address: string
 }
 
-const DUMMY_PATIENTS: Patient[] = Array.from({ length: 50 }, (_, i) => ({
-  id: (i + 1).toString(),
-  patientId: `P${(i + 1).toString().padStart(4, '0')}`,
-  createdAt: new Date(Date.now() - Math.random() * 10000000000),
-  lastVisit: Math.random() > 0.2 ? new Date(Date.now() - Math.random() * 1000000000) : null,
-  lastVisitType: Math.random() > 0.2 ? (Math.random() > 0.5 ? 'IPD' : 'OPD') : null,
-  name: `Patient ${i + 1}`,
-  age: 20 + Math.floor(Math.random() * 50),
-  gender: ['Male', 'Female', 'Other'][Math.floor(Math.random() * 3)] as 'Male' | 'Female' | 'Other',
-  contact: `+91 ${Math.floor(Math.random() * 9000000000) + 1000000000}`,
-  address: `Address ${i + 1}, City`
-}))
-
 export default function PatientsPage() {
-  const [patients, setPatients] = useState<Patient[]>(DUMMY_PATIENTS)
+  const { hasPermission } = useRole()
+  const { toast } = useToast()
+  const [patients, setPatients] = useState<Patient[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [page, setPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
   const itemsPerPage = 10
+  const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
 
-  const addPatient = (patient: Patient) => {
-    setPatients([...patients, patient])
+  useEffect(() => {
+    fetchPatients()
+
+    // Only set up realtime subscription in the browser
+    if (typeof window !== 'undefined') {
+      const subscription = supabase
+        .channel('patients')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'patients' },
+          (payload) => {
+            // Refresh the patients list when changes occur
+            fetchPatients()
+          }
+        )
+        .subscribe()
+
+      // Cleanup subscription
+      return () => {
+        subscription.unsubscribe()
+      }
+    }
+  }, [])
+
+  async function fetchPatients() {
+    try {
+      const response = await fetch('/api/patients')
+      if (!response.ok) throw new Error('Failed to fetch')
+      
+      const data = await response.json()
+      
+      setPatients(data.map((patient: any) => ({
+        id: patient.id,
+        patientId: patient.patient_id,
+        name: patient.name,
+        dateOfBirth: new Date(patient.date_of_birth),
+        gender: patient.gender,
+        contact: patient.contact,
+        address: patient.address,
+        attendantName: patient.attendant_name,
+        attendantContact: patient.attendant_contact,
+        idDocument: patient.id_document,
+        idNumber: patient.id_number,
+        createdAt: new Date(patient.created_at),
+        lastVisit: patient.last_visit ? new Date(patient.last_visit) : null,
+        lastVisitType: patient.last_visit_type
+      })))
+    } catch (error) {
+      console.error('Error fetching patients:', error)
+      toast({
+        title: "Error",
+        description: "Failed to fetch patients",
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
+
+  async function addPatient(patientData: Partial<Patient>) {
+    try {
+      const response = await fetch('/api/patients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patientData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to add patient')
+      }
+
+      const newPatient = await response.json()
+
+      // Create notification
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'New Patient Added',
+          message: `${patientData.name} has been registered as a new patient`,
+          type: 'patient',
+          link: `/patients/${newPatient.id}`,
+        }),
+      })
+
+      toast({
+        title: "Success",
+        description: "Patient added successfully",
+        variant: "default",
+        duration: 3000,
+      })
+
+      fetchPatients()
+      setIsDialogOpen(false)
+    } catch (error) {
+      console.error('Error adding patient:', error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to add patient",
+        variant: "destructive",
+        duration: 5000,
+      })
+    }
+  }
+
+  const handleEdit = (patient: Patient) => {
+    setEditingPatient(patient)
+  }
+
+  async function handleSaveEdit(data: Partial<Patient>) {
+    try {
+      if (!editingPatient?.id) return
+
+      const response = await fetch(`/api/patients/${editingPatient.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update patient')
+      }
+
+      toast({
+        title: "Success",
+        description: "Patient updated successfully",
+        variant: "default",
+        duration: 3000,
+      })
+
+      await fetchPatients()
+      setEditingPatient(null)
+    } catch (error) {
+      console.error('Error updating patient:', error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update patient",
+        variant: "destructive",
+        duration: 5000,
+      })
+    }
+  }
+
+  const handleDelete = async (patient: Patient) => {
+    try {
+      const response = await fetch(`/api/patients/${patient.id}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete patient');
+      }
+      
+      // Refresh the patients list
+      fetchPatients();
+      
+      toast({
+        title: 'Success',
+        description: 'Patient deleted successfully',
+      });
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete patient',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const filteredPatients = patients.filter(patient => 
     patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -57,56 +223,77 @@ export default function PatientsPage() {
 
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage)
 
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Patients</h1>
-        <div className="flex gap-4">
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search patients..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value)
-                setPage(1)  // Reset to first page on search
-              }}
-            />
+    <PageContainer>
+      <div className="w-full py-10 px-4">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Patients</h1>
+          <div className="flex gap-4">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search patients..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setPage(1)
+                }}
+              />
+            </div>
+            {hasPermission('manage_patients') && (
+              <Button onClick={() => setIsDialogOpen(true)}>Add Patient</Button>
+            )}
           </div>
-          <Button onClick={() => setIsDialogOpen(true)}>Add Patient</Button>
         </div>
+        
+        <PatientsTable 
+          patients={paginatedPatients} 
+          canEdit={hasPermission('manage_patients')}
+          canDelete={hasPermission('delete_patients')}
+          onEdit={handleEdit}
+        />
+        
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-sm">
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+          >
+            Next
+          </Button>
+        </div>
+        
+        <AddPatientDialog 
+          open={isDialogOpen} 
+          onOpenChange={setIsDialogOpen}
+          onAddPatient={addPatient}
+        />
+
+        <EditPatientDialog
+          patient={editingPatient}
+          open={editingPatient !== null}
+          onOpenChange={(open) => !open && setEditingPatient(null)}
+          onSave={handleSaveEdit}
+          onDelete={handleDelete}
+        />
       </div>
-      
-      <PatientsTable patients={paginatedPatients} />
-      
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setPage(p => Math.max(1, p - 1))}
-          disabled={page === 1}
-        >
-          Previous
-        </Button>
-        <span className="text-sm">
-          Page {page} of {totalPages}
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-          disabled={page === totalPages}
-        >
-          Next
-        </Button>
-      </div>
-      
-      <AddPatientDialog 
-        open={isDialogOpen} 
-        onOpenChange={setIsDialogOpen}
-        onAddPatient={addPatient}
-      />
-    </div>
+    </PageContainer>
   )
 } 

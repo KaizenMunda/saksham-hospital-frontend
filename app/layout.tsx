@@ -1,18 +1,17 @@
 import "./globals.css"
 import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Sidebar } from "@/components/sidebar"
-import { TopNav } from "@/components/top-nav"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { SettingsProvider } from "@/contexts/settings-context"
-import type React from "react"
+import { LayoutContent } from "./layout-content"
+import { Toaster } from "@/components/ui/toaster"
+import { RoleProvider } from '@/contexts/role-context'
+import { WelcomeHeader } from '@/components/WelcomeHeader'
+import { Sidebar } from '@/components/Sidebar'
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Flowers&Saints Dashboard",
-  description: "A modern, responsive financial dashboard",
-    generator: 'v0.dev'
+  title: "Saksham Hospital Dashboard",
+  description: "Hospital Management System",
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -23,26 +22,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SettingsProvider>
-            <TooltipProvider delayDuration={0}>
-              <div className="min-h-screen flex">
-                <Sidebar />
-                <div className="flex-1">
-                  <TopNav />
-                  <div className="container mx-auto p-6 max-w-7xl">
-                    <main className="w-full">{children}</main>
-                  </div>
-                </div>
-              </div>
-            </TooltipProvider>
-          </SettingsProvider>
-        </ThemeProvider>
+        <RoleProvider>
+          <div className="flex h-screen">
+            <Sidebar />
+            <LayoutContent className={inter.className}>
+              {children}
+            </LayoutContent>
+          </div>
+          <Toaster />
+        </RoleProvider>
       </body>
     </html>
   )
 }
-
-
-
-import './globals.css'
