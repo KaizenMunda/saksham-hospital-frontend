@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { format } from 'date-fns'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useToast } from "@/components/ui/use-toast"
 import {
   Select,
   SelectContent,
@@ -10,11 +12,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { type Patient } from "@/app/patients/types"
-import { format } from "date-fns"
-import { useToast } from "@/components/ui/use-toast"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Trash } from "lucide-react"
+import { type Patient } from "@/app/patients/types"
 
 // Add ID document types
 const ID_DOCUMENTS = [
@@ -28,7 +38,7 @@ const ID_DOCUMENTS = [
 type IdDocumentType = typeof ID_DOCUMENTS[number]
 
 interface PatientFormProps {
-  patient?: Patient | null
+  patient?: Patient
   onSubmit: (data: any) => Promise<void>
   onCancel: () => void
   onDelete?: (patient: Patient) => Promise<void>
@@ -44,6 +54,8 @@ export function PatientForm({
 }: PatientFormProps) {
   const { toast } = useToast()
   const [isDeleting, setIsDeleting] = useState(false)
+  const [phoneError, setPhoneError] = useState('')
+  const [dobError, setDobError] = useState('')
   
   // Initialize form with patient data if available
   const [formData, setFormData] = useState({
@@ -58,7 +70,6 @@ export function PatientForm({
   // Update form data when patient changes
   useEffect(() => {
     if (patient) {
-      console.log("Setting form data from patient:", patient);
       setFormData({
         name: patient.name || '',
         dateOfBirth: patient.dateOfBirth ? format(new Date(patient.dateOfBirth), 'yyyy-MM-dd') : '',
@@ -70,31 +81,77 @@ export function PatientForm({
     }
   }, [patient])
 
+  const validatePhone = (phone: string) => {
+    // Remove any non-digit characters
+    const digits = phone.replace(/\D/g, '')
+    
+    if (digits.length !== 10) {
+      setPhoneError('Phone number must be exactly 10 digits')
+      return false
+    }
+    
+    setPhoneError('')
+    return true
+  }
+
+  const validateDateOfBirth = (dob: string) => {
+    if (!dob) return false
+    
+    const dobDate = new Date(dob)
+    const today = new Date()
+    
+    // Clear time portion for date comparison
+    today.setHours(0, 0, 0, 0)
+    
+    if (dobDate > today) {
+      setDobError('Date of birth cannot be in the future')
+      return false
+    }
+    
+    setDobError('')
+    return true
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await onSubmit(formData)
+    
+    // Validate phone number
+    if (!validatePhone(formData.contact)) {
+      return
+    }
+    
+    // Validate date of birth
+    if (!validateDateOfBirth(formData.dateOfBirth)) {
+      return
+    }
+    
+    // Convert date string to Date object
+    const submissionData = {
+      ...formData,
+      dateOfBirth: new Date(formData.dateOfBirth)
+    }
+    
+    await onSubmit(submissionData)
   }
   
   const handleDelete = async () => {
-    if (!patient || !onDelete) return;
+    if (!patient || !onDelete) return
     
     try {
-      setIsDeleting(true);
-      await onDelete(patient);
-      // Don't show success toast here, it will be shown by the parent component
+      setIsDeleting(true)
+      await onDelete(patient)
     } catch (error) {
-      console.error("Error deleting patient:", error);
+      console.error("Error deleting patient:", error)
       toast({
         title: "Error",
         description: error.message || "Failed to delete patient",
         variant: "destructive"
-      });
-      // Important: Don't close the dialog on error
-      throw error; // Re-throw to prevent dialog from closing
+      })
+      throw error // Re-throw to prevent dialog from closing
     } finally {
-      setIsDeleting(false);
+      setIsDeleting(false)
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -112,9 +169,15 @@ export function PatientForm({
         <Input
           type="date"
           value={formData.dateOfBirth}
-          onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+          onChange={(e) => {
+            if (dobError) setDobError('')
+            setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))
+          }}
           required
         />
+        {dobError && (
+          <p className="text-sm text-destructive">{dobError}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -138,9 +201,15 @@ export function PatientForm({
         <label className="text-sm font-medium">Phone Number *</label>
         <Input
           value={formData.contact}
-          onChange={(e) => setFormData(prev => ({ ...prev, contact: e.target.value }))}
+          onChange={(e) => {
+            if (phoneError) setPhoneError('')
+            setFormData(prev => ({ ...prev, contact: e.target.value }))
+          }}
           required
         />
+        {phoneError && (
+          <p className="text-sm text-destructive">{phoneError}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -196,7 +265,10 @@ export function PatientForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting || !!phoneError || !!dobError}
+          >
             {isSubmitting ? 'Saving...' : (patient ? 'Update' : 'Add')}
           </Button>
         </div>

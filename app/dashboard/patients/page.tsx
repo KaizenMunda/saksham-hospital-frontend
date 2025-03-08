@@ -12,6 +12,8 @@ import { EditPatientDialog } from '@/components/patients/EditPatientDialog'
 import { AddPatientDialog } from '@/components/patients/AddPatientDialog'
 import { type Patient } from "@/app/patients/types"
 import { PageContainer } from '@/components/ui/page-container'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Plus } from 'lucide-react'
 
 export interface Patient {
   id: string
@@ -36,6 +38,7 @@ export default function PatientsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const itemsPerPage = 10
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
+  const [isAddingPatient, setIsAddingPatient] = useState(false)
 
   useEffect(() => {
     fetchPatients()
@@ -223,6 +226,11 @@ export default function PatientsPage() {
 
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage)
 
+  const handleCloseDialog = () => {
+    setEditingPatient(null)
+    setIsAddingPatient(false)
+  }
+
   if (isLoading) {
     return <div>Loading...</div>
   }
@@ -246,17 +254,30 @@ export default function PatientsPage() {
               />
             </div>
             {hasPermission('manage_patients') && (
-              <Button onClick={() => setIsDialogOpen(true)}>Add Patient</Button>
+              <Button onClick={() => setIsAddingPatient(true)} className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Add Patient
+              </Button>
             )}
           </div>
         </div>
         
-        <PatientsTable 
-          patients={paginatedPatients} 
-          canEdit={hasPermission('manage_patients')}
-          canDelete={hasPermission('delete_patients')}
-          onEdit={handleEdit}
-        />
+        <Card>
+          <CardHeader>
+            <CardTitle>All Patients</CardTitle>
+            <CardDescription>
+              View and manage all patient records
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PatientsTable 
+              patients={paginatedPatients} 
+              canEdit={hasPermission('manage_patients')}
+              canDelete={hasPermission('delete_patients')}
+              onEdit={handleEdit}
+            />
+          </CardContent>
+        </Card>
         
         <div className="flex items-center justify-end space-x-2 py-4">
           <Button
@@ -268,7 +289,7 @@ export default function PatientsPage() {
             Previous
           </Button>
           <span className="text-sm">
-            Page {page} of {totalPages}
+            Page <span suppressHydrationWarning>{page}</span> of <span suppressHydrationWarning>{totalPages}</span>
           </span>
           <Button
             variant="outline"
@@ -281,15 +302,15 @@ export default function PatientsPage() {
         </div>
         
         <AddPatientDialog 
-          open={isDialogOpen} 
-          onOpenChange={setIsDialogOpen}
+          open={isAddingPatient} 
+          onOpenChange={handleCloseDialog}
           onAddPatient={addPatient}
         />
 
         <EditPatientDialog
           patient={editingPatient}
           open={editingPatient !== null}
-          onOpenChange={(open) => !open && setEditingPatient(null)}
+          onOpenChange={handleCloseDialog}
           onSave={handleSaveEdit}
           onDelete={handleDelete}
         />

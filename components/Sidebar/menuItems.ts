@@ -18,7 +18,8 @@ import {
   Bell,
   Users,
   UserPlus,
-  Stethoscope
+  Stethoscope,
+  UserCog
 } from "lucide-react"
 
 export interface MenuItem {
@@ -32,19 +33,19 @@ export interface MenuItem {
 export const menuItems: MenuItem[] = [
   {
     title: "Dashboard",
-    path: "/",
+    path: "/dashboard",
     icon: Home,
     permission: undefined
   },
   {
     title: "Patients",
-    path: "/patients",
+    path: "/dashboard/patients",
     icon: Users2,
-    permission: undefined
+    permission: "view_patients"
   },
   {
     title: "IPD Admissions",
-    path: "/ipd",
+    path: "/dashboard/ipd",
     icon: BedDouble,
     permission: undefined
   },
@@ -100,13 +101,13 @@ export const menuItems: MenuItem[] = [
       },
       {
         title: "Panels",
-        path: "/panels",
+        path: "/dashboard/finance/panels",
         icon: Building2,
         permission: undefined
       },
       {
         title: "Expenses",
-        path: "/finance/expenses",
+        path: "/dashboard/finance/expenses",
         icon: Receipt,
         permission: undefined
       },
@@ -132,14 +133,20 @@ export const menuItems: MenuItem[] = [
   },
   {
     title: "Settings",
-    path: "/settings",
+    path: "/dashboard/settings",
     icon: Settings,
     permission: undefined
   },
   {
     title: "Help",
-    path: "/help",
+    path: "/dashboard/help",
     icon: HelpCircle,
     permission: undefined
+  },
+  {
+    title: "Staff",
+    path: "/dashboard/staff",
+    icon: UserCog,
+    permission: "view_staff"
   }
 ] 

@@ -1,17 +1,14 @@
-import "./globals.css"
-import { Inter } from "next/font/google"
-import { LayoutContent } from "./layout-content"
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
 import { Toaster } from "@/components/ui/toaster"
-import { RoleProvider } from '@/contexts/role-context'
-import { WelcomeHeader } from '@/components/WelcomeHeader'
-import { Sidebar } from '@/components/Sidebar'
+import { ThemeProvider } from "@/components/theme-provider"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
-  title: "Saksham Hospital Dashboard",
-  description: "Hospital Management System",
-  generator: 'v0.dev'
+export const metadata: Metadata = {
+  title: 'Healing Hub',
+  description: 'Healthcare Management System',
 }
 
 export default function RootLayout({
@@ -20,17 +17,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className={inter.className}>
-        <RoleProvider>
-          <div className="flex h-screen">
-            <Sidebar />
-            <LayoutContent className={inter.className}>
-              {children}
-            </LayoutContent>
-          </div>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
           <Toaster />
-        </RoleProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

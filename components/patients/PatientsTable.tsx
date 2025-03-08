@@ -29,6 +29,7 @@ import {
   BedDouble
 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { formatDate, formatDisplayDate } from '@/lib/date-utils'
 
 interface PatientsTableProps {
   patients: Patient[]
@@ -51,15 +52,15 @@ export function PatientsTable({ patients, canEdit, canDelete, limit, onEdit }: P
 
   // Action handlers
   const handleViewHistory = (patientId: string) => {
-    router.push(`/patients/${patientId}/history`)
+    router.push(`/dashboard/patients/${patientId}/history`)
   }
 
   const handleNewOPD = (patientId: string) => {
-    router.push(`/patients/${patientId}/opd/new`)
+    router.push(`/dashboard/patients/${patientId}/opd/new`)
   }
 
   const handleNewIPD = (patientId: string) => {
-    router.push(`/patients/${patientId}/ipd/new`)
+    router.push(`/dashboard/patients/${patientId}/ipd/new`)
   }
 
   return (
@@ -88,7 +89,7 @@ export function PatientsTable({ patients, canEdit, canDelete, limit, onEdit }: P
                   <Button 
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push(`/patients/${patient.id}`)}
+                    onClick={() => router.push(`/dashboard/patients/${patient.id}`)}
                     className="flex items-center gap-1"
                   >
                     <FileText className="h-4 w-4" />
@@ -98,7 +99,7 @@ export function PatientsTable({ patients, canEdit, canDelete, limit, onEdit }: P
                   <Button 
                     variant="outline"
                     size="sm" 
-                    onClick={() => router.push(`/ipd?openAdmissionDialog=true&patientId=${patient.id}`)}
+                    onClick={() => router.push(`/dashboard/ipd-appointments?openAdmissionDialog=true&patientId=${patient.id}`)}
                     className="flex items-center gap-1"
                   >
                     <BedDouble className="h-4 w-4" />

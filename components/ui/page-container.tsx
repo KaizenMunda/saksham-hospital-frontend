@@ -1,10 +1,11 @@
 interface PageContainerProps {
   children: React.ReactNode
+  className?: string
 }
 
-export function PageContainer({ children }: PageContainerProps) {
+export function PageContainer({ children, className }: PageContainerProps) {
   return (
-    <div className="w-full max-w-full py-6 px-6">
+    <div className={`container py-6 ${className || ''}`}>
       {children}
     </div>
   )

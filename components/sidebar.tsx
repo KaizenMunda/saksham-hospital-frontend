@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
   Home,
@@ -27,127 +28,168 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
-import { menuItems, type MenuItem } from "@/components/Sidebar/menuItems"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { menuItems } from "@/components/Sidebar/menuItems"
 import { useRole } from "@/contexts/role-context"
-
-interface NavItemProps {
-  item: MenuItem
-  isNested?: boolean
-}
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 export function Sidebar() {
-  const pathname = usePathname()
-  const { hasPermission, role } = useRole()
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [openMenus, setOpenMenus] = useState<string[]>([])
-
-  console.log({
-    role,
-    menuItems: menuItems.map(item => ({
-      title: item.title,
-      permission: item.permission,
-      visible: !item.permission || hasPermission(item.permission)
-    }))
-  })
-
-  const toggleMenu = (title: string) => {
-    setOpenMenus(prev =>
-      prev.includes(title)
-        ? prev.filter(item => item !== title)
-        : [...prev, title]
-    )
-  }
-
-  const NavItem = ({ item, isNested }: NavItemProps) => {
-    const isActive = pathname === item.path
-    const hasChildren = item.children && item.children.length > 0
-    const isOpen = openMenus.includes(item.title)
-
-    if (item.permission && !hasPermission(item.permission)) {
-      return null
-    }
-
-    return (
-      <div>
-        {item.path ? (
-          <Link href={item.path}>
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full justify-start",
-                isActive && "bg-muted",
-                isNested && "pl-8"
-              )}
-            >
-              {!isCollapsed && <item.icon className="mr-2 h-4 w-4" />}
-              {!isCollapsed && <span>{item.title}</span>}
-            </Button>
-          </Link>
-        ) : (
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start",
-              isNested && "pl-8"
-            )}
-            onClick={() => toggleMenu(item.title)}
-          >
-            {!isCollapsed && <item.icon className="mr-2 h-4 w-4" />}
-            {!isCollapsed && (
-              <>
-                <span>{item.title}</span>
-                <ChevronDown
-                  className={cn(
-                    "ml-auto h-4 w-4 transition-transform",
-                    isOpen && "rotate-180"
-                  )}
-                />
-              </>
-            )}
-          </Button>
-        )}
-        {hasChildren && isOpen && !isCollapsed && item.children && (
-          <div className="ml-4 mt-1 space-y-1">
-            {item.children.map((child) => (
-              <NavItem key={child.title} item={child} isNested />
-            ))}
-          </div>
-        )}
-      </div>
-    )
-  }
+  const pathname = usePathname()
+  const { hasPermission } = useRole()
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <div className="relative min-h-screen border-r">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-2 top-2"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          {isCollapsed ? <Menu /> : <ChevronLeft />}
-        </Button>
-        <div className={cn(
-          "pb-12 min-h-screen",
-          isCollapsed ? "w-16" : "w-64"
-        )}>
-          <div className="space-y-4 py-4">
-            <div className="px-3 py-2">
-              <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-                {!isCollapsed && "Menu"}
-              </h2>
-              <nav className="space-y-1">
-                {menuItems.map((item) => (
-                  <NavItem key={item.title} item={item} />
-                ))}
-              </nav>
-            </div>
+    <>
+      {/* Mobile Sidebar */}
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button
+            variant="outline"
+            size="icon"
+            className="md:hidden fixed left-4 top-4 z-40"
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle Menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-[240px] sm:w-[300px] pr-0 bg-accent text-white border-r border-accent/80">
+          <div className="px-2 py-6 flex items-center">
+            <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-white">
+              <Image
+                src="/placeholder-logo.svg"
+                width={24}
+                height={24}
+                alt="Logo"
+                className="invert"
+              />
+              <span>Saksham Hospital</span>
+            </Link>
           </div>
+          <ScrollArea className="h-[calc(100vh-4rem)]">
+            <nav className="grid gap-1 p-2">
+              {menuItems.map((item) => {
+                // Skip items that require permissions the user doesn't have
+                if (item.permission && !hasPermission(item.permission)) {
+                  return null
+                }
+
+                return (
+                  <Link
+                    key={item.title}
+                    href={item.path || '#'}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      pathname === item.path 
+                        ? "bg-white text-accent" 
+                        : "text-white/90 hover:bg-white/10 hover:text-white",
+                      isCollapsed && "justify-center"
+                    )}
+                  >
+                    <item.icon className={cn(
+                      "h-5 w-5",
+                      pathname === item.path ? "text-accent" : "text-white/80"
+                    )} />
+                    {!isCollapsed && <span>{item.title}</span>}
+                  </Link>
+                )
+              })}
+            </nav>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop Sidebar */}
+      <div
+        className={cn(
+          "hidden md:flex flex-col border-r border-accent/80 bg-accent text-white h-screen sticky top-0",
+          isCollapsed ? "w-[80px]" : "w-[240px]"
+        )}
+      >
+        <div className="flex h-14 items-center px-4 border-b border-accent/80">
+          {isCollapsed ? (
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Link href="/dashboard" className="flex items-center justify-center">
+                    <Image
+                      src="/placeholder-logo.svg"
+                      width={24}
+                      height={24}
+                      alt="Logo"
+                      className="invert"
+                    />
+                    <span className="sr-only">Saksham Hospital</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="font-semibold">
+                  Saksham Hospital
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-white">
+              <Image
+                src="/placeholder-logo.svg"
+                width={24}
+                height={24}
+                alt="Logo"
+                className="invert"
+              />
+              <span>Saksham Hospital</span>
+            </Link>
+          )}
+          {!isCollapsed && (
+            <div className="ml-auto">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsCollapsed(true)}
+                className="text-white hover:bg-accent-600"
+              >
+                <ChevronLeft className="h-5 w-5" />
+                <span className="sr-only">Collapse</span>
+              </Button>
+            </div>
+          )}
         </div>
+        <ScrollArea className="flex-1">
+          <nav className="grid gap-1 p-2">
+            {menuItems.map((item) => {
+              // Skip items that require permissions the user doesn't have
+              if (item.permission && !hasPermission(item.permission)) {
+                return null
+              }
+
+              return (
+                <Link
+                  key={item.title}
+                  href={item.path || '#'}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    pathname === item.path 
+                      ? "bg-white text-accent" 
+                      : "text-white/90 hover:bg-white/10 hover:text-white",
+                    isCollapsed && "justify-center"
+                  )}
+                >
+                  <item.icon className={cn(
+                    "h-5 w-5",
+                    pathname === item.path ? "text-accent" : "text-white/80"
+                  )} />
+                  {!isCollapsed && <span>{item.title}</span>}
+                </Link>
+              )
+            })}
+          </nav>
+        </ScrollArea>
       </div>
-    </TooltipProvider>
+    </>
   )
 }
 

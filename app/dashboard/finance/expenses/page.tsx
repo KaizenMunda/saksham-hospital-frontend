@@ -68,33 +68,20 @@ export default function ExpensesPage() {
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Expense Management</h1>
-        <div className="flex gap-2">
-          <Dialog open={isExpenseDialogOpen} onOpenChange={setIsExpenseDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Expense
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <ExpenseForm 
-                categories={categories} 
-                onSuccess={handleExpenseAdded} 
-              />
-            </DialogContent>
-          </Dialog>
+        <div className="flex gap-2 items-center">
+          <Button 
+            onClick={() => setIsExpenseDialogOpen(true)}
+            className="bg-accent text-white hover:bg-accent/90"
+          >
+            <Plus className="h-4 w-4 mr-1" /> Add Expense
+          </Button>
           
-          <Dialog open={isCategoryDialogOpen} onOpenChange={setIsCategoryDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Category
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <ExpenseCategoryForm onSuccess={handleCategoryAdded} />
-            </DialogContent>
-          </Dialog>
+          <Button 
+            onClick={() => setIsCategoryDialogOpen(true)}
+            className="bg-accent text-white hover:bg-accent/90"
+          >
+            <Plus className="h-4 w-4 mr-1" /> Add Category
+          </Button>
         </div>
       </div>
       
