@@ -114,6 +114,11 @@ export default function StaffPage() {
             staff={filteredStaff}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onNewStaff={() => {
+              setEditingStaff(undefined)
+              setIsDialogOpen(true)
+            }}
+            isLoading={false}
           />
         </CardContent>
       </Card>

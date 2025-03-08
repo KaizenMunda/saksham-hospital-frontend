@@ -114,18 +114,23 @@ export default function DashboardPage() {
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="border-gray-200 shadow-sm hover:shadow transition-shadow duration-200">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-medium text-gray-900">Total Patients</CardTitle>
-                <CardDescription className="text-gray-500">All registered patients</CardDescription>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Patients
+                </CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary">
+                <div className="text-2xl font-bold" suppressHydrationWarning>
                   {typeof window === 'undefined' ? '0' : '1248'}
                 </div>
-                <p className="text-xs text-gray-500 flex items-center mt-1">
-                  <ArrowUpRight className="h-3 w-3 mr-1 text-green-500" />
-                  <span className="text-green-500 font-medium">12%</span> from last month
+                <p className="text-xs text-muted-foreground flex items-center mt-1">
+                  <span className="text-green-500 flex items-center mr-1">
+                    <ArrowUpRight className="h-3 w-3 mr-1" />
+                    12%
+                  </span>
+                  from last month
                 </p>
               </CardContent>
             </Card>

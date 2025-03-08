@@ -45,7 +45,7 @@ export function Sidebar() {
   const { hasPermission } = useRole()
 
   return (
-    <>
+    <div className={cn("sidebar", isCollapsed ? "collapsed" : "expanded")}>
       {/* Mobile Sidebar */}
       <Sheet>
         <SheetTrigger asChild>
@@ -58,99 +58,80 @@ export function Sidebar() {
             <span className="sr-only">Toggle Menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[240px] sm:w-[300px] pr-0 bg-accent text-white border-r border-accent/80">
-          <div className="px-2 py-6 flex items-center">
-            <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-white">
-              <Image
-                src="/placeholder-logo.svg"
-                width={24}
-                height={24}
-                alt="Logo"
-                className="invert"
-              />
-              <span>Saksham Hospital</span>
-            </Link>
-          </div>
-          <ScrollArea className="h-[calc(100vh-4rem)]">
-            <nav className="grid gap-1 p-2">
-              {menuItems.map((item) => {
-                // Skip items that require permissions the user doesn't have
-                if (item.permission && !hasPermission(item.permission)) {
-                  return null
-                }
+        <SheetContent side="left" className="p-0">
+          <div className="flex flex-col h-full">
+            <div className="p-4 border-b">
+              <Link href="/dashboard" className="flex items-center gap-2">
+                <Image 
+                  src="/logo.png" 
+                  alt="Saksham Logo" 
+                  width={48} 
+                  height={48} 
+                />
+                <span className="text-lg font-bold">Saksham</span>
+              </Link>
+            </div>
+            <ScrollArea className="flex-1">
+              <nav className="grid gap-1 p-2">
+                {menuItems.map((item) => {
+                  // Skip items that require permissions the user doesn't have
+                  if (item.permission && !hasPermission(item.permission)) {
+                    return null
+                  }
 
-                return (
-                  <Link
-                    key={item.title}
-                    href={item.path || '#'}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                      pathname === item.path 
-                        ? "bg-white text-accent" 
-                        : "text-white/90 hover:bg-white/10 hover:text-white",
-                      isCollapsed && "justify-center"
-                    )}
-                  >
-                    <item.icon className={cn(
-                      "h-5 w-5",
-                      pathname === item.path ? "text-accent" : "text-white/80"
-                    )} />
-                    {!isCollapsed && <span>{item.title}</span>}
-                  </Link>
-                )
-              })}
-            </nav>
-          </ScrollArea>
+                  return (
+                    <Link
+                      key={item.title}
+                      href={item.path || '#'}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                        pathname === item.path ? "bg-accent text-accent-foreground" : "transparent"
+                      )}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {item.title}
+                    </Link>
+                  )
+                })}
+              </nav>
+            </ScrollArea>
+          </div>
         </SheetContent>
       </Sheet>
 
       {/* Desktop Sidebar */}
       <div
         className={cn(
-          "hidden md:flex flex-col border-r border-accent/80 bg-accent text-white h-screen sticky top-0",
-          isCollapsed ? "w-[80px]" : "w-[240px]"
+          "hidden md:flex flex-col border-r bg-sidebar",
+          isCollapsed ? "w-16" : "w-64"
         )}
       >
-        <div className="flex h-14 items-center px-4 border-b border-accent/80">
+        <div className="flex h-14 items-center border-b px-4">
           {isCollapsed ? (
-            <TooltipProvider>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Link href="/dashboard" className="flex items-center justify-center">
-                    <Image
-                      src="/placeholder-logo.svg"
-                      width={24}
-                      height={24}
-                      alt="Logo"
-                      className="invert"
-                    />
-                    <span className="sr-only">Saksham Hospital</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="font-semibold">
-                  Saksham Hospital
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsCollapsed(false)}
+              className="ml-auto"
+            >
+              <ChevronRight className="h-5 w-5" />
+              <span className="sr-only">Expand</span>
+            </Button>
           ) : (
-            <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-white">
-              <Image
-                src="/placeholder-logo.svg"
-                width={24}
-                height={24}
-                alt="Logo"
-                className="invert"
-              />
-              <span>Saksham Hospital</span>
-            </Link>
-          )}
-          {!isCollapsed && (
-            <div className="ml-auto">
+            <div className="flex items-center justify-between w-full">
+              <Link href="/dashboard" className="flex items-center gap-2">
+                <Image 
+                  src="/logo.png" 
+                  alt="Saksham Logo" 
+                  width={48} 
+                  height={48} 
+                />
+                <span className="text-lg font-bold">Saksham</span>
+              </Link>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsCollapsed(true)}
-                className="text-white hover:bg-accent-600"
               >
                 <ChevronLeft className="h-5 w-5" />
                 <span className="sr-only">Collapse</span>
@@ -171,17 +152,12 @@ export function Sidebar() {
                   key={item.title}
                   href={item.path || '#'}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname === item.path 
-                      ? "bg-white text-accent" 
-                      : "text-white/90 hover:bg-white/10 hover:text-white",
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                    pathname === item.path ? "bg-accent text-accent-foreground" : "transparent",
                     isCollapsed && "justify-center"
                   )}
                 >
-                  <item.icon className={cn(
-                    "h-5 w-5",
-                    pathname === item.path ? "text-accent" : "text-white/80"
-                  )} />
+                  <item.icon className="h-5 w-5" />
                   {!isCollapsed && <span>{item.title}</span>}
                 </Link>
               )
@@ -189,7 +165,7 @@ export function Sidebar() {
           </nav>
         </ScrollArea>
       </div>
-    </>
+    </div>
   )
 }
 

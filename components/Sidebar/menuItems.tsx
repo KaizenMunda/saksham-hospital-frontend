@@ -21,6 +21,7 @@ import {
   Stethoscope,
   UserCog
 } from "lucide-react"
+import './sidebar.css' // Import the sidebar styles
 
 export interface MenuItem {
   title: string
@@ -149,4 +150,19 @@ export const menuItems: MenuItem[] = [
     icon: UserCog,
     permission: "view_staff"
   }
-] 
+]
+
+// Ensure the sidebar component applies the class
+const Sidebar = () => {
+  return (
+    <div className="sidebar">
+      {/* Render menu items here */}
+    </div>
+  )
+}
+
+// Update the sidebar style
+const sidebarStyle = {
+  backgroundColor: '#4CAF50', // Change sidebar color
+  // other styles...
+} 

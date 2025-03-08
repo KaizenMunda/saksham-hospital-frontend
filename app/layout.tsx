@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Healing Hub',
+  title: 'Saksham Hospital',
   description: 'Healthcare Management System',
 }
 

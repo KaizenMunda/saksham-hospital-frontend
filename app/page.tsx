@@ -3,51 +3,11 @@
 import { useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MainNav } from '@/components/ui/nav'
 import { PatientsTable } from '@/components/patients/PatientsTable'
 import { EditPatientDialog } from '@/components/patients/EditPatientDialog'
-import { type Patient } from "@/app/patients/types"
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-
-// Mock users with hospital-specific roles
-const USERS = [
-  { id: '1', name: 'Dr. Saksham', role: 'Admin', department: 'Management' },
-  { id: '2', name: 'Dr. Sarah', role: 'Doctor', department: 'Cardiology' },
-  { id: '3', name: 'Dr. John', role: 'Doctor', department: 'Pediatrics' },
-  { id: '4', name: 'Nurse Jane', role: 'Nurse', department: 'ICU' },
-  { id: '5', name: 'Mr. Smith', role: 'Reception', department: 'Front Desk' }
-]
-
-// Mock patients data
-const MOCK_PATIENTS: Patient[] = [
-  {
-    id: '1',
-    patientId: 'P0000001',
-    name: 'John Doe',
-    dateOfBirth: new Date('1978-05-15'),
-    gender: 'Male',
-    contact: '+91 98765 43210',
-    address: '123 Main St',
-    createdAt: new Date(),
-    lastVisit: new Date(),
-    lastVisitType: 'OPD'
-  },
-  {
-    id: '2',
-    patientId: 'P0000002',
-    name: 'Jane Smith',
-    dateOfBirth: new Date('1991-08-23'),
-    gender: 'Female',
-    contact: '+91 98765 43211',
-    address: '456 Oak St',
-    createdAt: new Date(),
-    lastVisit: new Date(),
-    lastVisitType: 'IPD'
-  },
-  // Add more mock patients as needed
-]
 
 export default function LandingPage() {
   return (
@@ -88,7 +48,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-0 bg-cover bg-center" style={{ backgroundImage: 'url(/dental-clinic.jpg)' }}>
+      <section className="relative py-0 bg-cover bg-center" style={{ backgroundImage: 'url(/hero-background.jpg)' }}>
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="container relative z-10 mx-auto px-6 py-24 md:py-36">
           <div className="max-w-xl">

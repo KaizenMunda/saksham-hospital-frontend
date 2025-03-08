@@ -8,7 +8,7 @@ import { SettingsProvider } from "@/contexts/settings-context"
 import { RoleProvider } from '@/contexts/role-context'
 import { SupabaseProvider } from '@/contexts/supabase-context'
 import { Navbar } from '@/components/Navbar'
-import { Sidebar } from '@/components/Sidebar'
+import { Sidebar } from '@/components/sidebar'
 
 export default function DashboardLayout({
   children,

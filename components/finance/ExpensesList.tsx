@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { Expense, ExpenseCategory } from '@/app/finance/expenses/types'
+import { Expense, ExpenseCategory } from '@/app/dashboard/finance/expenses/types'
 import { ExpenseForm } from './ExpenseForm'
 import { ExpenseDetails } from './ExpenseDetails'
 import { format } from 'date-fns'

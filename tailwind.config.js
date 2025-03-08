@@ -6,6 +6,9 @@ module.exports = {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
+    './app/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+    './pages/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     container: {
@@ -17,43 +20,39 @@ module.exports = {
     },
     extend: {
       colors: {
-        primary: {
-          DEFAULT: "#0070f3",
-          foreground: "#ffffff",
-          50: "#e6f0ff",
-          100: "#cce0ff",
-          200: "#99c2ff",
-          300: "#66a3ff",
-          400: "#3385ff",
-          500: "#0070f3",
-          600: "#005cc5",
-          700: "#004799",
-          800: "#00336d",
-          900: "#001a36",
-        },
-        secondary: {
-          DEFAULT: "#10b981",
-          foreground: "#ffffff",
-        },
-        accent: {
-          DEFAULT: "#f59e0b",
-          foreground: "#ffffff",
-        },
-        destructive: {
-          DEFAULT: "#ef4444",
-          foreground: "#ffffff",
-        },
-        muted: {
-          DEFAULT: "#f3f4f6",
-          foreground: "#6b7280",
-        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        card: "hsl(var(--card))",
-        "card-foreground": "hsl(var(--card-foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
         orange: {
           500: '#FF6B35',
           600: '#E85A2A',
@@ -61,6 +60,9 @@ module.exports = {
         green: {
           500: '#10B981',
           600: '#059669',
+        },
+        sidebar: {
+          DEFAULT: '#CCAF50',
         },
       },
       borderRadius: {

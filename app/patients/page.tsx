@@ -1,22 +1,28 @@
 'use client'
-
+import React from 'react'
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { PatientsTable } from '@/components/patients/PatientsTable'
-import { Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { Search } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/use-toast'
 import { supabase } from '@/lib/supabase'
 import { useRole } from '@/contexts/role-context'
 import { EditPatientDialog } from '@/components/patients/EditPatientDialog'
 import { AddPatientDialog } from '@/components/patients/AddPatientDialog'
 import { PageContainer } from '@/components/ui/page-container'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus } from 'lucide-react'
-import { Patient as PatientType } from '@/app/patients/types'
 
-export interface Patient extends PatientType {
-  // You can add additional properties here if needed
+export interface Patient {
+  id: string
+  patientId: string
+  createdAt: Date
+  lastVisit: Date | null
+  lastVisitType: 'IPD' | 'OPD' | null
+  name: string
+  age: number
+  gender: 'Male' | 'Female' | 'Other'
+  contact: string
+  address: string
 }
 
 export default function PatientsPage() {
@@ -29,7 +35,6 @@ export default function PatientsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const itemsPerPage = 10
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
-  const [isAddingPatient, setIsAddingPatient] = useState(false)
 
   useEffect(() => {
     fetchPatients()
@@ -194,11 +199,11 @@ export default function PatientsPage() {
         title: 'Success',
         description: 'Patient deleted successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting patient:', error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to delete patient',
+        description: error.message || 'Failed to delete patient',
         variant: 'destructive',
       });
     }
@@ -216,11 +221,6 @@ export default function PatientsPage() {
   )
 
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage)
-
-  const handleCloseDialog = () => {
-    setEditingPatient(null)
-    setIsAddingPatient(false)
-  }
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -245,30 +245,17 @@ export default function PatientsPage() {
               />
             </div>
             {hasPermission('manage_patients') && (
-              <Button onClick={() => setIsAddingPatient(true)} className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Add Patient
-              </Button>
+              <Button onClick={() => setIsDialogOpen(true)}>Add Patient</Button>
             )}
           </div>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>All Patients</CardTitle>
-            <CardDescription>
-              View and manage all patient records
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PatientsTable 
-              patients={paginatedPatients} 
-              canEdit={hasPermission('manage_patients')}
-              canDelete={hasPermission('delete_patients')}
-              onEdit={handleEdit}
-            />
-          </CardContent>
-        </Card>
+        <PatientsTable 
+          patients={paginatedPatients} 
+          canEdit={hasPermission('manage_patients')}
+          canDelete={hasPermission('delete_patients')}
+          onEdit={handleEdit}
+        />
         
         <div className="flex items-center justify-end space-x-2 py-4">
           <Button
@@ -280,7 +267,7 @@ export default function PatientsPage() {
             Previous
           </Button>
           <span className="text-sm">
-            Page <span suppressHydrationWarning>{page}</span> of <span suppressHydrationWarning>{totalPages}</span>
+            Page {page} of {totalPages}
           </span>
           <Button
             variant="outline"
@@ -293,15 +280,15 @@ export default function PatientsPage() {
         </div>
         
         <AddPatientDialog 
-          open={isAddingPatient} 
-          onOpenChange={handleCloseDialog}
+          open={isDialogOpen} 
+          onOpenChange={setIsDialogOpen}
           onAddPatient={addPatient}
         />
 
         <EditPatientDialog
           patient={editingPatient}
           open={editingPatient !== null}
-          onOpenChange={handleCloseDialog}
+          onOpenChange={(open) => !open && setEditingPatient(null)}
           onSave={handleSaveEdit}
           onDelete={handleDelete}
         />

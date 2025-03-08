@@ -108,10 +108,9 @@ export default function ResetPasswordPage() {
       
       if (token) {
         // If we have a token, use it to update the password
-        updateResult = await supabase.auth.updateUser(
-          { password: values.password },
-          { accessToken: token }
-        )
+        updateResult = await supabase.auth.updateUser({
+          password: values.password,
+        })
       } else {
         // Otherwise, try to update the password using the current session
         updateResult = await supabase.auth.updateUser({
