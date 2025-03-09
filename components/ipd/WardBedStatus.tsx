@@ -48,12 +48,11 @@ export function WardBedStatus({
           
           <Progress 
             value={displayOverallRate} 
-            className="h-2 mb-3" 
-            indicatorColor={
+            className={`h-2 mb-3 ${
               displayOverallRate > 90 ? "bg-destructive" : 
               displayOverallRate > 75 ? "bg-warning" : 
               "bg-primary"
-            }
+            }`}
           />
           
           <div className="grid grid-cols-3 gap-2 text-center text-xs">
@@ -95,12 +94,11 @@ export function WardBedStatus({
               
               <Progress 
                 value={displayRate} 
-                className="h-2 mb-3" 
-                indicatorColor={
+                className={`h-2 mb-3 ${
                   displayRate > 90 ? "bg-destructive" : 
                   displayRate > 75 ? "bg-warning" : 
                   "bg-primary"
-                }
+                }`}
               />
               
               <div className="grid grid-cols-3 gap-2 text-center text-xs">

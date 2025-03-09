@@ -7,9 +7,42 @@ export interface StaffMember {
   department: string;
   joinDate: Date;
   status: 'active' | 'inactive';
+  
+  // Basic Info
+  fatherName?: string;
+  dob?: Date;
+  bloodGroup?: string;
+  gender?: 'male' | 'female' | 'other';
+  active?: boolean;
+  
+  // Identification
+  aadhaar?: string;
+  mobile?: string;
   address?: string;
+  photo?: string;
+  signature?: string;
+  idProof?: string;
+  kycNumber?: string;
+  kycDocument?: string;
+  
+  // Professional
+  designation?: string;
   qualifications?: string[];
+  qualification?: string;
   specialization?: string;
+  resume?: string;
+  dutyHours?: string;
+  
+  // Financial
+  salaryType?: string;
+  salaryAmount?: string | number;
+  pfUan?: string;
+  pan?: string;
+  salary?: string | number;
+  bankName?: string;
+  accountNumber?: string | number;
+  
+  // Other
   emergencyContact?: string;
   profileImage?: string;
 }

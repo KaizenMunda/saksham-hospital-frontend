@@ -61,9 +61,7 @@ module.exports = {
           500: '#10B981',
           600: '#059669',
         },
-        sidebar: {
-          DEFAULT: '#CCAF50',
-        },
+        
       },
       borderRadius: {
         lg: "var(--radius)",
