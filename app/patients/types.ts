@@ -5,5 +5,7 @@ export interface Patient {
   dateOfBirth: Date;
   gender: 'Male' | 'Female' | 'Other';
   contact: string;
+  address: string;
+  email: string;
   // Add other relevant fields...
 } 

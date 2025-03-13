@@ -144,7 +144,7 @@ export function PatientForm({
       console.error("Error deleting patient:", error)
       toast({
         title: "Error",
-        description: error.message || "Failed to delete patient",
+        description: (error as Error).message || "Failed to delete patient",
         variant: "destructive"
       })
       throw error // Re-throw to prevent dialog from closing
@@ -173,6 +173,7 @@ export function PatientForm({
             if (dobError) setDobError('')
             setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))
           }}
+          max={format(new Date(), 'yyyy-MM-dd')}
           required
         />
         {dobError && (

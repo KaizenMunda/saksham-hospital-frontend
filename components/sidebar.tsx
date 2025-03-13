@@ -25,6 +25,7 @@ import {
   X,
   LayoutDashboard,
   ChevronLeft,
+  Package,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -77,7 +78,7 @@ const sidebarSections: SidebarSection[] = [
     ]
   },
   {
-    title: "Management",
+    title: "People",
     items: [
       {
         title: "Doctors",
@@ -89,6 +90,11 @@ const sidebarSections: SidebarSection[] = [
         path: "/dashboard/staff",
         icon: UserCog,
       },
+    ]
+  },
+  {
+    title: "Management",
+    items: [
       {
         title: "Finance",
         path: "/dashboard/finance",
@@ -110,6 +116,11 @@ const sidebarSections: SidebarSection[] = [
         title: "Billing",
         path: "/dashboard/billing",
         icon: CreditCard,
+      },
+      {
+        title: "Inventory",
+        path: "/dashboard/inventory",
+        icon: Package,
       },
       {
         title: "Reports",
